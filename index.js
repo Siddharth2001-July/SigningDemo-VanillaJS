@@ -96,10 +96,17 @@ PSPDFKit.load({
       const expandoControl = instance.contentDocument.querySelector(
         ".PSPDFKit-Expando-Control"
       );
-      if (expandoControl) expandoControl.insertAdjacentElement("beforeBegin", html);
+      const containsSelectUser = instance.contentDocument.querySelector("#userRoles");
+      if (expandoControl && !containsSelectUser) expandoControl.insertAdjacentElement("beforeBegin", html);
     }
     // Save the state of the document in the local storage
     const storeState = await instance.exportInstantJSON();
     localStorage.setItem("storeState", JSON.stringify(storeState));
+  });
+
+  // Add event listner for formField creation
+  //IMP 
+  instance.addEventListener("formFields.create", async (formField) => {
+    console.log("Form Field Created", formField);
   });
 });
