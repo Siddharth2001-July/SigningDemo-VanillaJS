@@ -13,7 +13,7 @@ const allUsers = [
   { id: "frtyfyzrwsgres4y5x80", name: "User 4", isAdmin: false },
 ];
 
-const currentUser = allUsers[0];
+const currentUser = allUsers[2];
 
 PSPDFKit.load({
   baseUrl,
@@ -76,7 +76,11 @@ PSPDFKit.load({
   //This is the User Role Select Element
   //Event listener to check whehter the clicked annotation is a Signature Widget
   instance.addEventListener("annotations.press", async (event) => {
-
+    const { annotation } = event;
+    const formFields = await instance.getFormFields();
+    const formField = formFields.get(
+      formFields.map((e) => e.name).indexOf(annotation.formFieldName)
+    );
 
     //If it's a signature widget I activate the Form Creator Mode
     if (
@@ -89,10 +93,7 @@ PSPDFKit.load({
 
       let html = createDynamicSelect(instance, annotation, allUsers, signer);
 
-      const formFields = await instance.getFormFields();
-      const formField = formFields.get(
-        formFields.map((e) => e.name).indexOf(annotation.formFieldName)
-      );
+      
       //Searching for the Property Expando Control Widget where I'll insert the Select Element
       const expandoControl = instance.contentDocument.querySelector(
         ".PSPDFKit-Expando-Control"
@@ -106,8 +107,13 @@ PSPDFKit.load({
     }
   });
 
+  // Store state on delete annotation
+  instance.addEventListener("annotations.delete", async (event)=>{
+    const storeState = await instance.exportInstantJSON();
+    localStorage.setItem("storeState", JSON.stringify(storeState));
+  })
+
   // Add event listner for formField creation
-  //IMP 
   instance.addEventListener("formFields.create", async (formField) => {
     console.log("Form Field Created", formField);
   });
