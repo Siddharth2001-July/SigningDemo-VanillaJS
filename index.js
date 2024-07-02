@@ -76,32 +76,34 @@ PSPDFKit.load({
   //This is the User Role Select Element
   //Event listener to check whehter the clicked annotation is a Signature Widget
   instance.addEventListener("annotations.press", async (event) => {
-    const { annotation } = event;
-    // Current signer to this field
-    const signer = annotation.customData.signer.id;
 
-    let html = createDynamicSelect(instance, annotation, allUsers, signer);
-
-    const formFields = await instance.getFormFields();
-    const formField = formFields.get(
-      formFields.map((e) => e.name).indexOf(annotation.formFieldName)
-    );
 
     //If it's a signature widget I activate the Form Creator Mode
     if (
       annotation &&
       formField instanceof PSPDFKit.FormFields.SignatureFormField
     ) {
+      const { annotation } = event;
+      // Current signer to this field
+      const signer = annotation.customData.signer.id;
+
+      let html = createDynamicSelect(instance, annotation, allUsers, signer);
+
+      const formFields = await instance.getFormFields();
+      const formField = formFields.get(
+        formFields.map((e) => e.name).indexOf(annotation.formFieldName)
+      );
       //Searching for the Property Expando Control Widget where I'll insert the Select Element
       const expandoControl = instance.contentDocument.querySelector(
         ".PSPDFKit-Expando-Control"
       );
       const containsSelectUser = instance.contentDocument.querySelector("#userRoles");
       if (expandoControl && !containsSelectUser) expandoControl.insertAdjacentElement("beforeBegin", html);
+
+      // Save the state of the document in the local storage
+      const storeState = await instance.exportInstantJSON();
+      localStorage.setItem("storeState", JSON.stringify(storeState));
     }
-    // Save the state of the document in the local storage
-    const storeState = await instance.exportInstantJSON();
-    localStorage.setItem("storeState", JSON.stringify(storeState));
   });
 
   // Add event listner for formField creation

@@ -4,7 +4,7 @@ export const getUserAnnotations = async (instance, user) => {
     let ann = await instance.getAnnotations(i);
     ann.forEach((annotation) => {
       if (annotation.customData && annotation.customData.signer.id == user.id) {
-        annotations.push(annotation.id);
+        annotations.push(annotation.formFieldName);
       }
     });
   }
@@ -12,14 +12,14 @@ export const getUserAnnotations = async (instance, user) => {
 };
 
 export const enableUserSignatureFields = async (instance, user) => {
-  const userFieldIds = await getUserAnnotations(instance,user);
+  const userFieldNames = await getUserAnnotations(instance,user);
   const allFormFields = await instance.getFormFields();
   const signatureFormFields = allFormFields.filter(
     (field) => field instanceof PSPDFKit.FormFields.SignatureFormField
   );
   const readOnlyFormFields = signatureFormFields
     .map((it) => {
-      if (userFieldIds.includes(it.id)) {
+      if (userFieldNames.includes(it.name)) {
         return it.set("readOnly", false);
       } else {
         return it.set("readOnly", true);
